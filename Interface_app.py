@@ -1,8 +1,37 @@
 import streamlit as st
 import pandas as pd
 import random
+import streamlit as st
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+
+# ฟังก์ชันที่ใช้เชื่อมต่อกับ Google Sheets
+def send_log_to_sheet(action, user_location, user_type, user_budget, user_time, result):
+    try:
+        # เชื่อมต่อกับ Google Sheets
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(
+            {
+                "type": "service_account",
+                "project_id": "project-ai-459806",
+                "private_key_id": "c9267de79b8d3d6a8a560627af5639e414a9443f",
+                "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDJTTTOJcRENLTM\n+c0tVlSXOkn8KYYJilOQ0AhRIWrWcyYbzUUGZF4nL7ZlIEwOOHc6x9GfBZcJdBow\n6nxx1yaWFEmAaet6XjYLOlkj1sAvTNY6TsN76Hp/mDtxY0KlQfOBlTKBbZBI0CUl\neaO9+HPdyYGB2Qvx4kpCN1p+6LN0JEowL7WhdDTe5m1YjpbqTgnkI4BWLB+hBq8P\nxGROoHIjLqU/o3zG1OvzkDcuBiYsOV7G4nbp99bB8F+ppLU4InLt7FE6CBs/sGsb\nAk4K+UW6+MLEpd4vDUN2n62IcGko9LtA2m42h+gnJO9c5qmkXx44VxC0DAOslJUr\nJKCdYEBzAgMBAAECggEAG6/o0WnUYuU08PRyygeTvvEfd/VmIC3MbKCQZEhKX5Ca\n7zv+gHCRmqYvWh1lGJefnpAZPtwP+Bbl+1BlKWtEPWQw796hqsUGfejaldlVuavB\n02c97+772kzf8CqM4hn+GhahSbf+HmWylkLyyJBBr4GltGxb/jr3p7/hTI9JD3In\n5YiVglRBhgIrg3cnq6VSFcoO0rzLqAZT3/azsW6PXRoj4Xs+FYnxFTJowSAvjmC0\nWSL2TBJSwE4B6nCaaeI6w1BZIAPLVGJ9RkSbTNwpbvviOqHRab44+W6SoSwRIsfd\nCcFMmNBO91wLCw4PcTbkm5eqcD/E+U2cBzlRoIp8oQKBgQDmvrl6jKFwdXFttJC1\nlZ+EycZ9nNQ4ORIiih2OHR0u954on5Vc/S0HocrKwrJMuo7IYK/63vMe+kpmJ2dv\n4taK/yURkPkGtfLT1DwlgkbSp88uBO0gkNeEqsTAH5n4QXKSawKULNhGzYXLUjs5\nW2Vz1MJRMJozuh4zn7h9kRHHGQKBgQDfVYCYfgZKHOYLlD0uN0mmW0hC1EcUbPRE\njCrZ0yjtTCAM91NgWQUG73bBk5KJrhg/q1fRjic6r/DjZpAP0DHQ8QTO2B7VJMEf\nSs9t2IRgPcg/Tmc7C8ncV6d238IZAoRhP8Q+2wbwXnpSlkEJfydIDbDdDVmxsuLV\nDaC1xJBxawKBgQDElft58DReloBj4fFj8yyruiiUvjeECwNrT9ZsTFuftzEVFRjw\n13Y0yV/3rTaw7kRVbSKhDq99Vepq6+lRRqZYV5YiSCwRzpQqaugvYLWsJXH6mBHa\nq+whyEfGE2ZfPos5OVhCG47Li7AQkGeKr1ZZAAvplgnaRhgTDWHmAOFviQKBgQDK\n8SZe674JYMNGaFlEAueBLNe4Kq/AhtVc6MYTlEdPgupo/eIc3iesSrPuaYwyYioU\nyT2O5g8NzE0oRs3IINbz1+AXmdpCsxhuuAtP9P0te1bY+ATkaezvthMt+VymX1wu\nBsTsnRlsGV4sZ+8Hkyz907sQ1A3aZQSst6p/IfRjqwKBgEEv1dKIDujQLQqQUnEH\nPuEGfnEgp43Rb4U4llRz72ilGA48BU/Oef0eANUlAGCa8ncMGRcDTuUT/KAoJyWd\n1Xy+ACjXGjSIfvI9pbZFByRbhO+ROEhVCEoEn0u7guY9lFXTm8+hJaf7NYU9FyBc\n+cPMAcOOElIuTJ8hoAnLqBRU\n-----END PRIVATE KEY-----\n",
+                "client_email": "project-ai-access@project-ai-459806.iam.gserviceaccount.com",
+                "client_id": "101094804846571311433",
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/project-ai-access%40project-ai-459806.iam.gserviceaccount.com",
+                "universe_domain": "googleapis.com"
+            }, scope)
+        client = gspread.authorize(creds)
+        sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/15B994mgifhskM4pZYZndC9SFgD3KudFcXhCC8bknUJw/edit?gid=0#gid=0").sheet1
+        sheet.append_row([action, user_location, user_type, user_budget, user_time, result])
+    except Exception as e:
+        st.error(f"เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: {e}")
+
+# --- เรียกใช้ฟังก์ชันนี้ในส่วนที่ต้องการ ---
+send_log_to_sheet("Action", "Location", "Food Type", "Budget", "Time", "Result")
 
 
 # --- ตัวเลือกฐานข้อมูลหลักสำหรับการกรอก ---
