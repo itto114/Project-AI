@@ -89,7 +89,7 @@ if st.session_state.selected_result:
     if st.button("🔁 ทำอีกครั้ง"):
         reset_all()
 
-# --- รีเฟรชหน้าต่างได้เมื่อ trigger_rerun ถูกตั้งค่า ---
+# --- จัดการการรีเฟรช --- 
 if st.session_state.trigger_rerun:
     st.session_state.trigger_rerun = False
     st.experimental_rerun()
