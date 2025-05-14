@@ -5,11 +5,13 @@ import pandas as pd
 sheet_url = "https://docs.google.com/spreadsheets/d/1ENpJYa3tnNrv6BBZJFG9pDNUTDqkbP7RQyBnA6pKSLI/edit?usp=sharing"
 csv_url = sheet_url.replace("/edit?usp=sharing", "/export?format=csv")
 
-@st.cache
+# ใช้ st.cache_data แทน st.cache
+@st.cache_data
 def load_data(url):
     return pd.read_csv(url)
 
 df = load_data(csv_url)
+
 
 # --- เริ่มต้นค่า session_state ถ้ายังไม่ถูกตั้งค่า ---
 if 'step' not in st.session_state:
