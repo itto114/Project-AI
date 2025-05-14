@@ -4,6 +4,7 @@ import random
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
+
 # --- ตัวเลือกฐานข้อมูลหลักสำหรับการกรอก ---
 LOCATIONS = ["ประตู1", "ประตู2", "ประตู3", "ประตู4"]
 BUDGETS = ["น้อยกว่า50", "50 - 100", "100 - 200", "200+"]
