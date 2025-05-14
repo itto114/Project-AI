@@ -7,18 +7,3 @@ oauth2client
 
 
 pip install gspread oauth2client
-
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-
-# ฟังก์ชันเชื่อมต่อ Google Sheets
-def send_log_to_sheet(action, user_location, user_type, user_budget, user_time, result):
-    try:
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_name("config/credentials.json", scope)
-        client = gspread.authorize(creds)
-
-        sheet = client.open("MealMatch").sheet1
-        sheet.append_row([action, user_location, user_type, user_budget, user_time, result])
-    except Exception as e:
-        st.error(f"เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: {e}")
