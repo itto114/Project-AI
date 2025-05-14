@@ -60,13 +60,12 @@ if st.session_state.step == 1:
         st.session_state.user_time = user_time
         st.session_state.step = 2
 
-    # แนะนำร้านยอดนิยมแบบสุ่ม
     st.markdown("---")
     st.subheader("🔥 ร้านแนะนำสำหรับคุณ")
     for rec in random.sample(data, 2):
         st.markdown(f"**{rec['name']}** — {rec['type_1']} | {rec['budget']} | {rec['location']} | {rec['time_to_open']}")
 
-# === ส่วนที่ 2: เลือกร้านอาหาร ===
+# === ส่วนที่ 2: เลือกร้านอาหาร (checkbox version) ===
 elif st.session_state.step == 2:
     st.subheader("🍴 ร้านอาหารที่ตรงกับเงื่อนไขของคุณ")
 
@@ -77,28 +76,27 @@ elif st.session_state.step == 2:
     user_time = st.session_state.user_time
 
     if not filtered_df.empty:
-        selected = None
+        selected_restaurants = []
         for row in filtered_df.itertuples():
-            choice = st.radio(
+            checked = st.checkbox(
                 label=f"🏪 {row.name}\n\n📌 ประเภท: {row.type_1}\n📍 บริเวณ: {row.location}\n💸 งบประมาณ: {row.budget}\n⏰ เวลาเปิด: {row.time_to_open}",
-                options=[row.name],
-                index=0 if selected is None else -1,
-                key=f"radio_{row.name}"
+                key=f"chk_{row.name}"
             )
-            if choice:
-                selected = choice
+            if checked:
+                selected_restaurants.append(row.name)
 
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("✅ ยืนยันการเลือกร้านนี้"):
-                if selected:
-                    st.session_state.selected_restaurant = selected
-                    st.session_state.history.append(selected)
-                    send_log_to_sheet("Selected", user_location, user_type, user_budget, user_time, selected)
+            if st.button("✅ ยืนยันการเลือกร้านเหล่านี้"):
+                if selected_restaurants:
+                    st.session_state.selected_restaurant = selected_restaurants
+                    st.session_state.history.extend(selected_restaurants)
+                    for sel in selected_restaurants:
+                        send_log_to_sheet("Selected", user_location, user_type, user_budget, user_time, sel)
                     st.session_state.step = 3
         with col2:
             if st.button("❌ ไม่มีร้านไหนถูกใจ"):
-                st.session_state.selected_restaurant = None
+                st.session_state.selected_restaurant = []
                 send_log_to_sheet("No Match", user_location, user_type, user_budget, user_time, "None")
                 st.session_state.step = 3
     else:
@@ -111,14 +109,14 @@ elif st.session_state.step == 3:
     st.subheader("🙏 ขอบคุณที่ใช้ระบบแนะนำร้านอาหาร!")
 
     if st.session_state.get('selected_restaurant'):
-        selected_name = st.session_state.selected_restaurant
-        selected_row = df[df['name'] == selected_name].iloc[0]
-        st.success(f"🎉 คุณเลือกร้าน: **{selected_name}**")
-        st.markdown(f"📌 ประเภท: {selected_row['type_1']}")
-        st.markdown(f"📍 บริเวณ: {selected_row['location']}")
-        st.markdown(f"💸 งบประมาณ: {selected_row['budget']}")
-        st.markdown(f"⏰ เวลาเปิด: {selected_row['time_to_open']}")
-        st.markdown(f"🔗 [ดูรายละเอียดเพิ่มเติม]({selected_row['url']})")
+        for selected_name in st.session_state.selected_restaurant:
+            selected_row = df[df['name'] == selected_name].iloc[0]
+            st.success(f"🎉 คุณเลือกร้าน: **{selected_name}**")
+            st.markdown(f"📌 ประเภท: {selected_row['type_1']}")
+            st.markdown(f"📍 บริเวณ: {selected_row['location']}")
+            st.markdown(f"💸 งบประมาณ: {selected_row['budget']}")
+            st.markdown(f"⏰ เวลาเปิด: {selected_row['time_to_open']}")
+            st.markdown(f"🔗 [ดูรายละเอียดเพิ่มเติม]({selected_row['url']})")
     else:
         st.info("😕 ไม่มีร้านไหนตรงใจคุณในครั้งนี้")
 
