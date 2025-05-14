@@ -12,7 +12,6 @@ def load_data(url):
 
 df = load_data(csv_url)
 
-
 # --- เริ่มต้นค่า session_state ถ้ายังไม่ถูกตั้งค่า ---
 if 'step' not in st.session_state:
     st.session_state.step = 1  # เริ่มจากขั้นตอนที่ 1
@@ -52,10 +51,12 @@ elif st.session_state.step == 2:
     filtered_df = st.session_state.filtered_df
 
     if not filtered_df.empty:
+        # ใช้ radio button ให้เลือกทีละร้าน
         restaurant_names = filtered_df["name"].tolist()
-        selected_restaurant = st.selectbox("เลือกดูร้านอาหารที่คุณชอบ", restaurant_names)
+        selected_restaurant = st.radio("เลือกดูร้านอาหารที่คุณชอบ", restaurant_names)
 
-        if st.button("เลือกร้านนี้"):
+        if st.button("ยืนยันเลือก"):
+            st.session_state.selected_restaurant = selected_restaurant
             st.session_state.step = 3  # ไปยังขั้นตอนที่ 3
 
         if st.button("ไม่มีร้านไหนถูกใจ"):
@@ -69,9 +70,17 @@ elif st.session_state.step == 2:
 # === ส่วนที่ 3: ขอบคุณและเริ่มใหม่ ===
 elif st.session_state.step == 3:
     st.subheader("ขอบคุณที่ใช้ระบบแนะนำร้านอาหาร!")
+    
+    if 'selected_restaurant' in st.session_state:
+        st.write(f"คุณเลือก: {st.session_state.selected_restaurant}")
+    else:
+        st.write("ขออภัย ไม่มีร้านไหนถูกใจคุณ")
+
     st.write("ขอบคุณที่เลือกใช้งาน เราหวังว่าคุณจะพบร้านที่ถูกใจ!")
     
     if st.button("🔄 เริ่มใหม่"):
         # รีเซ็ตสถานะและกลับไปยังขั้นตอนที่ 1
         st.session_state.step = 1
         del st.session_state.filtered_df  # ลบข้อมูลที่กรองไว้ก่อนหน้านี้
+        if 'selected_restaurant' in st.session_state:
+            del st.session_state.selected_restaurant  # ลบร้านที่เลือกไว้
