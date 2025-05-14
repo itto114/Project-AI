@@ -3,14 +3,6 @@ import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import LabelEncoder
 
-col_name = {
-    "name": "ชื่อร้าน",
-    "location": "บริเวณ",
-    "budget": "งบประมาณ",
-    "tto": "เวลา",
-    "type1": "ประเภทอาหาร 1",
-    "type2": "ประเภทอาหาร 2"
-}
 
 # --- โหลดข้อมูลจาก Google Sheet ---
 sheet_url = "https://docs.google.com/spreadsheets/d/1ENpJYa3tnNrv6BBZJFG9pDNUTDqkbP7RQyBnA6pKSLI/edit#gid=0"
@@ -24,12 +16,12 @@ df = load_data(csv_url)
 
 # === ตั้งชื่อคอลัมน์ตามที่ผู้ใช้ระบุ ===
 col_name = {
-    "name": "name",
-    "location": "location",
-    "budget": "budget",
-    "tto": "tto",
-    "type1": "type1",
-    "type2": "type2"
+    "name": "ชื่อร้าน",
+    "location": "บริเวณ",
+    "budget": "งบประมาณ",
+    "tto": "เวลา",
+    "type1": "ประเภทอาหาร 1",
+    "type2": "ประเภทอาหาร 2"
 }
 
 # === UI เลือกข้อมูลจากผู้ใช้ ===
