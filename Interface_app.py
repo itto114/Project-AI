@@ -56,16 +56,16 @@ elif st.session_state.step == 2:
     filtered_df = st.session_state.filtered_df
 
     if not filtered_df.empty:
-        # ใช้ st.radio เพื่อให้เลือกแค่ร้านเดียว
-        restaurant_names = filtered_df['name'].tolist()
-        selected = st.radio("✅ เลือกร้านที่ต้องการ", options=restaurant_names)
+        selected = st.radio("✅ เลือกร้านที่ต้องการ", options=filtered_df['name'].tolist())
 
         for row in filtered_df.itertuples():
-            st.markdown(f"### 🏪 {row.name}")
-            st.markdown(f"📌 ประเภท: {row.type_1}")
-            st.markdown(f"📍 บริเวณ: {row.location}")
-            st.markdown(f"💸 งบประมาณ: {row.budget}")
-            st.markdown(f"⏰ เวลาเปิด: {row.time_to_open}")
+            if selected == row.name:
+                st.markdown(f"### 🏪 {row.name}")
+                st.markdown(f"📌 ประเภท: {row.type_1}")
+                st.markdown(f"📍 บริเวณ: {row.location}")
+                st.markdown(f"💸 งบประมาณ: {row.budget}")
+                st.markdown(f"⏰ เวลาเปิด: {row.time_to_open}")
+                st.markdown(f"🔗 [ดูรายละเอียดเพิ่มเติม]({row.url})")
 
         col1, col2 = st.columns(2)
         with col1:
