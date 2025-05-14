@@ -3,6 +3,15 @@ import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import LabelEncoder
 
+col_name = {
+    "name": "ชื่อร้าน",
+    "location": "บริเวณ",
+    "budget": "งบประมาณ",
+    "tto": "เวลา",
+    "type1": "ประเภทอาหาร 1",
+    "type2": "ประเภทอาหาร 2"
+}
+
 # --- โหลดข้อมูลจาก Google Sheet ---
 sheet_url = "https://docs.google.com/spreadsheets/d/1ENpJYa3tnNrv6BBZJFG9pDNUTDqkbP7RQyBnA6pKSLI/edit#gid=0"
 csv_url = sheet_url.replace("/edit#gid=", "/export?format=csv&gid=")
@@ -27,6 +36,7 @@ col_name = {
 st.header("🍽️ ระบบแนะนำร้านอาหารโดยใช้ KNN")
 
 # สร้างตัวเลือกประเภทอาหารจากทั้งสองคอลัมน์
+st.write("🧪 คอลัมน์ทั้งหมดในไฟล์:", df.columns.tolist())
 all_types = pd.unique(pd.concat([df[col_name["type1"]], df[col_name["type2"]]]).dropna())
 
 user_location = st.selectbox("📍 บริเวณที่ต้องการ", df[col_name["location"]].dropna().unique())
