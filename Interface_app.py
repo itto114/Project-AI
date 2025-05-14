@@ -123,6 +123,6 @@ elif st.session_state.step == 3:
             row = df[df['name'] == hist_name].iloc[0]
             st.markdown(f"- **{hist_name}** — {row['type_1']}, {row['location']}, {row['budget']}, {row['time_to_open']}")
 
-    if st.button("🔄 เริ่มใหม่"):
+    if st.button("🔄 ทำอีกครั้ง"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
