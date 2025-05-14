@@ -24,7 +24,6 @@ try:
 
     st.write(f"คุณเลือก: {user_location}, {user_choice}, {user_budget}, {user_time}")
 
-st.write(df.columns.tolist())
 
 except Exception as e:
     st.error("เกิดข้อผิดพลาดในการโหลดข้อมูลจาก Google Sheet")
