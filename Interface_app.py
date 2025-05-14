@@ -56,37 +56,27 @@ elif st.session_state.step == 2:
     filtered_df = st.session_state.filtered_df
 
     if not filtered_df.empty:
-        selected_restaurants = []
+        # ใช้ st.radio เพื่อให้เลือกแค่ร้านเดียว
+        restaurant_names = filtered_df['name'].tolist()
+        selected = st.radio("✅ เลือกร้านที่ต้องการ", options=restaurant_names)
 
-        # แสดงรายการร้านอาหารพร้อม checkbox และรายละเอียดในบรรทัดเดียวกัน
-        for index, row in filtered_df.iterrows():
-            col1, col2 = st.columns([1, 5])
-            with col1:
-                selected = st.checkbox("", key=row['name'])
-            with col2:
-                st.markdown(f"### 🏪 {row['name']}")
-                st.markdown(f"📌 ประเภท: {row['type_1']}")
-                st.markdown(f"📍 บริเวณ: {row['location']}")
-                st.markdown(f"💸 งบประมาณ: {row['budget']}")
-                st.markdown(f"⏰ เวลาเปิด: {row['time_to_open']}")
+        for row in filtered_df.itertuples():
+            st.markdown(f"### 🏪 {row.name}")
+            st.markdown(f"📌 ประเภท: {row.type_1}")
+            st.markdown(f"📍 บริเวณ: {row.location}")
+            st.markdown(f"💸 งบประมาณ: {row.budget}")
+            st.markdown(f"⏰ เวลาเปิด: {row.time_to_open}")
 
-                if selected:
-                    selected_restaurants.append(row['name'])
-
-        # ปุ่มยืนยันการเลือก
-        col1, col2 = st.columns([1, 1])
+        col1, col2 = st.columns(2)
         with col1:
-            if st.button("✅ ยืนยันการเลือกร้าน"):
-                if selected_restaurants:
-                    st.session_state.selected_restaurants = selected_restaurants
-                    st.session_state.step = 3  # ไปยังขั้นตอนที่ 3
-                else:
-                    st.warning("🚫 กรุณาเลือกอย่างน้อย 1 ร้าน")
+            if st.button("✅ ยืนยันการเลือกร้านนี้"):
+                st.session_state.selected_restaurant = selected
+                st.session_state.history.append(selected)
+                st.session_state.step = 3
         with col2:
             if st.button("❌ ไม่มีร้านไหนถูกใจ"):
-                st.session_state.selected_restaurants = []
+                st.session_state.selected_restaurant = None
                 st.session_state.step = 3
-
     else:
         st.warning("🚫 ไม่พบร้านอาหารที่ตรงกับความต้องการของคุณ")
         if st.button("🔙 กลับไปเลือกใหม่"):
@@ -96,18 +86,24 @@ elif st.session_state.step == 2:
 elif st.session_state.step == 3:
     st.subheader("🙏 ขอบคุณที่ใช้ระบบแนะนำร้านอาหาร!")
 
-    if 'selected_restaurants' in st.session_state and st.session_state.selected_restaurants:
-        st.write("คุณเลือก: 🏆")
-        for restaurant in st.session_state.selected_restaurants:
-            row = df[df['name'] == restaurant].iloc[0]
-            st.write(f"**{restaurant}**")
-            st.write(f"📌 ประเภท: {row['type_1']}")
-            st.write(f"📍 บริเวณ: {row['location']}")
-            st.write(f"💸 งบประมาณ: {row['budget']}")
-            st.write(f"⏰ เวลาเปิด: {row['time_to_open']}")
-            st.write(f"🔗 [ดูรายละเอียดเพิ่มเติม]({row['url']})")
+    if st.session_state.get('selected_restaurant'):
+        selected_name = st.session_state.selected_restaurant
+        selected_row = df[df['name'] == selected_name].iloc[0]
+        st.success(f"🎉 คุณเลือกร้าน: **{selected_name}**")
+        st.markdown(f"📌 ประเภท: {selected_row['type_1']}")
+        st.markdown(f"📍 บริเวณ: {selected_row['location']}")
+        st.markdown(f"💸 งบประมาณ: {selected_row['budget']}")
+        st.markdown(f"⏰ เวลาเปิด: {selected_row['time_to_open']}")
+        st.markdown(f"🔗 [ดูรายละเอียดเพิ่มเติม]({selected_row['url']})")
     else:
-        st.write("😕 **ขออภัย ไม่มีร้านไหนถูกใจคุณ**")
+        st.info("😕 ไม่มีร้านไหนตรงใจคุณในครั้งนี้")
+
+    if st.session_state.history:
+        st.markdown("---")
+        st.subheader("🕘 ประวัติการเลือกร้านก่อนหน้า")
+        for hist_name in st.session_state.history:
+            row = df[df['name'] == hist_name].iloc[0]
+            st.markdown(f"- **{hist_name}** — {row['type_1']}, {row['location']}, {row['budget']}, {row['time_to_open']}")
 
     if st.button("🔄 เริ่มใหม่"):
         for key in list(st.session_state.keys()):
