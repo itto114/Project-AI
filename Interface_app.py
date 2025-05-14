@@ -5,7 +5,6 @@ import pandas as pd
 sheet_url = "https://docs.google.com/spreadsheets/d/1ENpJYa3tnNrv6BBZJFG9pDNUTDqkbP7RQyBnA6pKSLI/edit?usp=sharing"
 csv_url = sheet_url.replace("/edit?usp=sharing", "/export?format=csv")
 
-# ใช้ st.cache_data แทน st.cache
 @st.cache_data
 def load_data(url):
     return pd.read_csv(url)
@@ -51,31 +50,24 @@ elif st.session_state.step == 2:
     filtered_df = st.session_state.filtered_df
 
     if not filtered_df.empty:
-        # ใช้ radio button ให้เลือกทีละร้าน
-        restaurant_names = filtered_df["name"].tolist()
-        selected_restaurant = st.radio("เลือกดูร้านอาหารที่คุณชอบ", restaurant_names)
+        for index, row in filtered_df.iterrows():
+            # แสดงชื่อร้าน
+            st.markdown(f"### 🏆 **{row['name']}**")
 
-        # แสดงข้อมูลร้านที่เลือกใต้ชื่อร้าน
-        selected_row = filtered_df[filtered_df["name"] == selected_restaurant].iloc[0]
+            # แสดงข้อมูลของร้าน
+            st.write(f"**ประเภทอาหาร**: {row['type_1']} / {row['type_2']}")
+            st.write(f"**บริเวณ**: {row['location']}")
+            st.write(f"**งบประมาณ**: {row['budget']}")
+            st.write(f"**เวลาเปิดร้าน**: {row['time_to_open']}")
 
-        # แสดงข้อมูลของร้านที่เลือก
-        st.markdown(f"### 🏆 **{selected_row['name']}**")
-        st.write(f"**ประเภทอาหาร**: {selected_row['type_1']} / {selected_row['type_2']}")
-        st.write(f"**บริเวณ**: {selected_row['location']}")
-        st.write(f"**งบประมาณ**: {selected_row['budget']}")
-        st.write(f"**เวลาเปิดร้าน**: {selected_row['time_to_open']}")
-
-        # สร้างคอลัมน์สำหรับจัดตำแหน่งปุ่ม
-        col1, col2 = st.columns([1, 1])
-
-        with col1:
-            if st.button("✅ **ยืนยันเลือก**"):
-                st.session_state.selected_restaurant = selected_restaurant
+            # ปุ่ม "เลือก" สำหรับแต่ละร้าน
+            if st.button(f"✅ **เลือก {row['name']}**", key=row['name']):
+                st.session_state.selected_restaurant = row['name']
                 st.session_state.step = 3  # ไปยังขั้นตอนที่ 3
 
-        with col2:
-            if st.button("❌ **ไม่มีร้านไหนถูกใจ**"):
-                st.session_state.step = 3  # ไปยังขั้นตอนที่ 3 (ไม่เลือกร้าน)
+        # ปุ่มสำหรับกรณีที่ไม่มีร้านไหนถูกใจ
+        if st.button("❌ **ไม่มีร้านไหนถูกใจ**"):
+            st.session_state.step = 3  # ไปยังขั้นตอนที่ 3 (ไม่เลือกร้าน)
 
     else:
         st.warning("🚫 **ไม่พบร้านอาหารที่ตรงกับความต้องการของคุณ**")
