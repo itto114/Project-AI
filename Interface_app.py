@@ -28,7 +28,7 @@ def send_log_to_sheet(action, user_location, user_type, user_budget, user_time, 
         sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/15B994mgifhskM4pZYZndC9SFgD3KudFcXhCC8bknUJw/edit?gid=0#gid=0").sheet1
         sheet.append_row([action, user_location, user_type, user_budget, user_time, result])
     except Exception as e:
-        st.error(f"เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: {e}")
+        #st.error(f"เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: {e}")
 
 # --- เรียกใช้ฟังก์ชันนี้ในส่วนที่ต้องการ ---
 send_log_to_sheet("Action", "Location", "Food Type", "Budget", "Time", "Result")
