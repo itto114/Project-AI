@@ -11,35 +11,25 @@ def load_data(url):
 
 df = load_data(csv_url)
 
-# === กำหนดชื่อคอลัมน์ให้ตรงกับ Google Sheet ===
-col_name = {
-    "name": "name",
-    "location": "location",
-    "budget": "budget",
-    "tto": "time_to_open",
-    "type1": "type1",
-    "type2": "type2"
-}
-
 # === UI รับข้อมูลจากผู้ใช้ ===
 st.header("🍽️ ระบบแนะนำร้านอาหาร (เฉพาะร้านที่ตรงเงื่อนไข)")
 
 # สร้างตัวเลือกประเภทอาหารจาก type1 และ type2
-all_types = pd.unique(pd.concat([df[col_name["type1"]], df[col_name["type2"]]]).dropna())
+all_types = pd.unique(pd.concat([df["type1"], df["type2"]]).dropna())
 
-user_location = st.selectbox("📍 เลือกบริเวณ", df[col_name["location"]].dropna().unique())
+user_location = st.selectbox("📍 เลือกบริเวณ", df["location"].dropna().unique())
 user_type = st.selectbox("🍱 เลือกประเภทอาหาร", all_types)
-user_budget = st.selectbox("💸 เลือกงบประมาณ", df[col_name["budget"]].dropna().unique())
-user_time = st.selectbox("⏰ เลือกเวลา", df[col_name["tto"]].dropna().unique())
+user_budget = st.selectbox("💸 เลือกงบประมาณ", df["budget"].dropna().unique())
+user_time = st.selectbox("⏰ เลือกเวลา", df["time_to_open"].dropna().unique())
 
 # === กรองข้อมูลจากเงื่อนไขผู้ใช้ ===
 filtered_df = df[
-    (df[col_name["location"]] == user_location) &
-    (df[col_name["budget"]] == user_budget) &
-    (df[col_name["tto"]] == user_time) &
+    (df["location"] == user_location) &
+    (df["budget"] == user_budget) &
+    (df["time_to_open"] == user_time) &
     (
-        (df[col_name["type1"]] == user_type) |
-        (df[col_name["type2"]] == user_type)
+        (df["type1"] == user_type) |
+        (df["type2"] == user_type)
     )
 ]
 
@@ -47,7 +37,7 @@ filtered_df = df[
 if not filtered_df.empty:
     st.subheader("✅ ร้านอาหารที่ตรงกับความต้องการ:")
     for _, row in filtered_df.iterrows():
-        st.markdown(f"- **{row[col_name['name']]}** ({row[col_name['type1']]} / {row[col_name['type2']]})")
+        st.markdown(f"- **{row['name']}** ({row['type1']} / {row['type2']})")
 else:
     st.warning("😥 ไม่พบร้านอาหารที่ตรงกับความต้องการของคุณ")
 
