@@ -5,7 +5,7 @@ import pandas as pd
 sheet_url = "https://docs.google.com/spreadsheets/d/1ENpJYa3tnNrv6BBZJFG9pDNUTDqkbP7RQyBnA6pKSLI/edit?usp=sharing"
 csv_url = sheet_url.replace("/edit?usp=sharing", "/export?format=csv")
 
-@st.cache_data
+@st.cache
 def load_data(url):
     return pd.read_csv(url)
 
@@ -44,8 +44,12 @@ if not filtered_df.empty:
     st.subheader("ร้านอาหารที่ตรงกับเงื่อนไขของคุณ:")
     for index, row in filtered_df.iterrows():
         st.markdown(f"- **{row['name']}** ({row['type_1']} / {row['type_2']})")
+        # เพิ่มข้อมูลเพิ่มเติมถ้าต้องการ
+        st.markdown(f"  [รายละเอียดร้าน]({row['website_link']})")  # สมมุติว่ามีคอลัมน์ website_link
 else:
     st.warning("ไม่พบร้านอาหารที่ตรงกับความต้องการของคุณ")
-    
+    st.write("ลองเลือกเงื่อนไขใหม่ เช่น ประเภทอาหารหรือเวลา")
+
+# --- รีเซ็ตการเลือก ---
 if st.button("🔁 เริ่มใหม่"):
     st.experimental_rerun()
