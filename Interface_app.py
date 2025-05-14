@@ -27,7 +27,7 @@ def send_log_to_sheet(action, user_location, user_type, user_budget, user_time, 
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         creds = ServiceAccountCredentials.from_json_keyfile_name("config/credentials.json", scope)
         client = gspread.authorize(creds)
-        sheet = client.open("MealMatch").sheet1
+        sheet = client.open("เก็บข้อมูล MealMatch").sheet1
         sheet.append_row([action, user_location, user_type, user_budget, user_time, result])
     except Exception as e:
         st.error(f"เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: {e}")
