@@ -58,8 +58,8 @@ def send_log_to_sheet(action, user_location, user_type, user_budget, user_time, 
         client = gspread.authorize(creds)
         sheet = client.open("MealMatch").sheet1
         sheet.append_row([action, user_location, user_type, user_budget, user_time, result])
-    except Exception as e:
-        st.error(f"เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: {e}")
+   # except Exception as e:
+       # st.error(f"เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: {e}")
 
 # --- เริ่มต้นค่า session_state ถ้ายังไม่ถูกตั้งค่า ---
 if 'step' not in st.session_state:
