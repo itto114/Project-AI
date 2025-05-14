@@ -45,7 +45,7 @@ if st.session_state.step == 1:
 
     # แนะนำร้านยอดนิยมแบบสุ่ม
     st.markdown("---")
-    st.subheader("🔥 ร้านแนะนำสำหรับคุณ")
+    st.subheader("🔥 แนะนำร้านอาหาร")
     for rec in random.sample(data, 2):
         st.markdown(f"**{rec['name']}** — {rec['type_1']} | {rec['budget']} | {rec['location']} | {rec['time_to_open']}")
 
@@ -109,6 +109,6 @@ elif st.session_state.step == 3:
     else:
         st.write("😕 **ขออภัย ไม่มีร้านไหนถูกใจคุณ**")
 
-    if st.button("🔄 เริ่มใหม่"):
+    if st.button("🔄 ทำอีกครั้ง"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
