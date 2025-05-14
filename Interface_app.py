@@ -56,32 +56,33 @@ elif st.session_state.step == 2:
     filtered_df = st.session_state.filtered_df
 
     if not filtered_df.empty:
-        selected = None
-        for row in filtered_df.itertuples():
-            choice = st.radio(
-                label=f"🏪 {row.name}\n\n📌 ประเภท: {row.type_1}\n📍 บริเวณ: {row.location}\n💸 งบประมาณ: {row.budget}\n⏰ เวลาเปิด: {row.time_to_open}",
-                options=[row.name],
-                index=0 if selected is None else -1,
-                key=f"radio_{row.name}"
-            )
-            if choice:
-                selected = choice
+        restaurant_names = filtered_df['name'].tolist()
 
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("✅ ยืนยันการเลือกร้านนี้"):
-                if selected:
+        # ตรวจสอบว่า restaurant_names มีค่าหรือไม่
+        if restaurant_names:
+            selected = st.radio("✅ เลือกร้านที่ต้องการ", options=restaurant_names)
+
+            for row in filtered_df.itertuples():
+                st.markdown(f"### 🏪 {row.name}")
+                st.markdown(f"📌 ประเภท: {row.type_1}\n\n📍 บริเวณ: {row.location}\n\n💸 งบประมาณ: {row.budget}\n\n⏰ เวลาเปิด: {row.time_to_open}")
+
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("✅ ยืนยันการเลือกร้านนี้"):
                     st.session_state.selected_restaurant = selected
                     st.session_state.history.append(selected)
                     st.session_state.step = 3
-        with col2:
-            if st.button("❌ ไม่มีร้านไหนถูกใจ"):
-                st.session_state.selected_restaurant = None
-                st.session_state.step = 3
+            with col2:
+                if st.button("❌ ไม่มีร้านไหนถูกใจ"):
+                    st.session_state.selected_restaurant = None
+                    st.session_state.step = 3
+        else:
+            st.warning("🚫 ไม่มีร้านอาหารให้เลือกในตอนนี้")
     else:
         st.warning("🚫 ไม่พบร้านอาหารที่ตรงกับความต้องการของคุณ")
         if st.button("🔙 กลับไปเลือกใหม่"):
             st.session_state.step = 1
+
 
 # === ส่วนที่ 3: ขอบคุณและแสดงผลลัพธ์ ===
 elif st.session_state.step == 3:
