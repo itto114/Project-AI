@@ -5,24 +5,33 @@ import pandas as pd
 sheet_url = "https://docs.google.com/spreadsheets/d/1ENpJYa3tnNrv6BBZJFG9pDNUTDqkbP7RQyBnA6pKSLI/edit?usp=sharing"
 csv_url = sheet_url.replace("/edit?usp=sharing", "/export?format=csv")
 
-@st.cache_data
-def load_data(url):
-    return pd.read_csv(url)
+@st.cache_data(ttl=300)
+def load_data():
+    return pd.read_csv(csv_url)
 
-# โหลดข้อมูล
-df = load_data(csv_url)
+# --- โหลดข้อมูล ---
+if "data" not in st.session_state:
+    st.session_state.data = load_data()
 
-# --- หน้าแรก ---
-st.header("🍽️ ระบบแนะนำร้านอาหาร")
+df = st.session_state.data
 
-# ตรวจสอบว่ามีการกดเริ่มใหม่หรือยัง
+# --- UI โหลดข้อมูลใหม่แบบแมนนวล ---
+if st.button("🔄 รีโหลดข้อมูลจาก Google Sheet"):
+    st.session_state.data = load_data()
+    st.success("โหลดข้อมูลใหม่เรียบร้อยแล้ว!")
+    st.experimental_rerun()
+
+# --- Session State สำหรับควบคุมการแสดงผล ---
 if "submitted" not in st.session_state:
     st.session_state.submitted = False
+
 if "selected_result" not in st.session_state:
     st.session_state.selected_result = None
 
-# --- แบบฟอร์มเลือกเงื่อนไข ---
+# --- หากยังไม่ยืนยัน ให้แสดงแบบฟอร์ม ---
 if not st.session_state.submitted:
+    st.header("🍽️ ระบบแนะนำร้านอาหาร")
+
     with st.form("input_form"):
         all_types = pd.unique(pd.concat([df["type_1"], df["type_2"]]).dropna())
 
@@ -33,18 +42,21 @@ if not st.session_state.submitted:
 
         submitted = st.form_submit_button("✅ ยืนยัน")
 
-    if submitted:
-        st.session_state.submitted = True
-        st.session_state.user_input = {
-            "location": user_location,
-            "type": user_type,
-            "budget": user_budget,
-            "time_to_open": user_time,
-        }
+        if submitted:
+            # เก็บค่าไว้ใน session_state แล้ว rerun เพื่อแสดงผลลัพธ์ทันที
+            st.session_state.user_input = {
+                "location": user_location,
+                "type": user_type,
+                "budget": user_budget,
+                "time_to_open": user_time,
+            }
+            st.session_state.submitted = True
+            st.experimental_rerun()
 
-# --- แสดงผลลัพธ์หลังการยืนยัน ---
-if st.session_state.submitted and st.session_state.selected_result is None:
+# --- หากยืนยันแล้ว แสดงผลลัพธ์ที่กรองได้ ---
+elif st.session_state.submitted and st.session_state.selected_result is None:
     user_input = st.session_state.user_input
+
     filtered_df = df[
         ((df["type_1"] == user_input["type"]) | (df["type_2"] == user_input["type"])) &
         (df["location"] == user_input["location"]) &
@@ -52,31 +64,30 @@ if st.session_state.submitted and st.session_state.selected_result is None:
         (df["time_to_open"] == user_input["time_to_open"])
     ]
 
+    st.subheader("📋 ผลลัพธ์ร้านอาหารที่ตรงกับเงื่อนไขของคุณ:")
+
     if not filtered_df.empty:
-        st.subheader("📋 กรุณาเลือกร้านอาหารที่ตรงใจคุณ:")
-
-        selected = st.radio(
-            "เลือกร้านที่ต้องการ",
-            filtered_df["name"].tolist() + ["ไม่มีร้านไหนตรงใจ"]
-        )
-
-        if st.button("👉 ยืนยันร้านที่เลือก"):
-            st.session_state.selected_result = selected
-
+        for idx, row in filtered_df.iterrows():
+            if st.button(f"เลือก: {row['name']}", key=f"result_{idx}"):
+                st.session_state.selected_result = row['name']
+                st.experimental_rerun()
     else:
         st.warning("😥 ไม่พบร้านอาหารที่ตรงกับความต้องการของคุณ")
-        if st.button("ไม่มีร้านไหนตรงใจ"):
-            st.session_state.selected_result = "ไม่มีร้านไหนตรงใจ"
 
-# --- แสดงหน้าขอบคุณ ---
-if st.session_state.selected_result is not None:
-    st.success("🎉 ขอบคุณที่เข้าร่วมการทำแบบทดสอบ!")
-    if st.session_state.selected_result != "ไม่มีร้านไหนตรงใจ":
-        st.markdown(f"คุณเลือกร้าน: **{st.session_state.selected_result}**")
+    if st.button("❌ ไม่มีร้านไหนตรงใจ"):
+        st.session_state.selected_result = "none"
+        st.experimental_rerun()
+
+# --- หน้าขอบคุณหลังเลือกผลลัพธ์ ---
+elif st.session_state.selected_result is not None:
+    st.header("🙏 ขอบคุณที่เข้าร่วมการทำแบบทดสอบ")
+
+    if st.session_state.selected_result != "none":
+        st.success(f"คุณเลือก: {st.session_state.selected_result}")
     else:
-        st.markdown("คุณเลือกว่าไม่มีร้านไหนตรงใจ")
+        st.info("คุณระบุว่าไม่มีร้านที่ตรงใจ")
 
     if st.button("🔁 ทำอีกครั้ง"):
-        st.session_state.submitted = False
-        st.session_state.selected_result = None
+        for key in ["submitted", "selected_result", "user_input"]:
+            st.session_state.pop(key, None)
         st.experimental_rerun()
