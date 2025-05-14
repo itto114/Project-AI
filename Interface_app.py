@@ -9,64 +9,74 @@ csv_url = sheet_url.replace("/edit?usp=sharing", "/export?format=csv")
 def load_data(url):
     return pd.read_csv(url)
 
+# โหลดข้อมูล
 df = load_data(csv_url)
 
-# --- Header ---
+# --- หน้าแรก ---
 st.header("🍽️ ระบบแนะนำร้านอาหาร")
 
-# ตรวจสอบสถานะของขั้นตอน
-if "step" not in st.session_state:
-    st.session_state.step = "selecting"
+# ตรวจสอบว่ามีการกดเริ่มใหม่หรือยัง
+if "submitted" not in st.session_state:
+    st.session_state.submitted = False
+if "selected_result" not in st.session_state:
+    st.session_state.selected_result = None
 
-# ขั้นตอน 1: ให้ผู้ใช้เลือกเงื่อนไข
-if st.session_state.step == "selecting":
-    all_types = pd.unique(pd.concat([df["type_1"], df["type_2"]]).dropna())
+# --- แบบฟอร์มเลือกเงื่อนไข ---
+if not st.session_state.submitted:
+    with st.form("input_form"):
+        all_types = pd.unique(pd.concat([df["type_1"], df["type_2"]]).dropna())
 
-    user_location = st.selectbox("📍 บริเวณที่ต้องการ", df["location"].dropna().unique())
-    user_type = st.selectbox("🍱 ประเภทอาหาร", all_types)
-    user_budget = st.selectbox("💸 งบประมาณ", df["budget"].dropna().unique())
-    user_time = st.selectbox("⏰ เวลาที่ต้องการจะไป (ร้านเปิด)", df["time_to_open"].dropna().unique())
+        user_location = st.selectbox("📍 บริเวณที่ต้องการ", df["location"].dropna().unique())
+        user_type = st.selectbox("🍱 ประเภทอาหาร", all_types)
+        user_budget = st.selectbox("💸 งบประมาณ", df["budget"].dropna().unique())
+        user_time = st.selectbox("⏰ เวลาที่ต้องการจะไป (ร้านเปิด)", df["time_to_open"].dropna().unique())
 
-    if st.button("🔍 ยืนยันการเลือก"):
-        # กรองข้อมูล
-        filtered_df = df[
-            ((df["type_1"] == user_type) | (df["type_2"] == user_type)) &
-            (df["location"] == user_location) &
-            (df["budget"] == user_budget) &
-            (df["time_to_open"] == user_time)
-        ]
+        submitted = st.form_submit_button("✅ ยืนยัน")
 
-        if filtered_df.empty:
-            st.session_state.step = "no_result"
-        else:
-            st.session_state.filtered_df = filtered_df
-            st.session_state.step = "choosing_result"
+    if submitted:
+        st.session_state.submitted = True
+        st.session_state.user_input = {
+            "location": user_location,
+            "type": user_type,
+            "budget": user_budget,
+            "time_to_open": user_time,
+        }
 
-# ขั้นตอน 2: แสดงผลลัพธ์ที่กรองได้
-elif st.session_state.step == "choosing_result":
-    st.subheader("🔎 ร้านอาหารที่ตรงกับความต้องการของคุณ")
+# --- แสดงผลลัพธ์หลังการยืนยัน ---
+if st.session_state.submitted and st.session_state.selected_result is None:
+    user_input = st.session_state.user_input
+    filtered_df = df[
+        ((df["type_1"] == user_input["type"]) | (df["type_2"] == user_input["type"])) &
+        (df["location"] == user_input["location"]) &
+        (df["budget"] == user_input["budget"]) &
+        (df["time_to_open"] == user_input["time_to_open"])
+    ]
 
-    options = st.radio(
-        "กรุณาเลือกร้านที่คุณสนใจ", 
-        st.session_state.filtered_df["name"].tolist()
-    )
+    if not filtered_df.empty:
+        st.subheader("📋 กรุณาเลือกร้านอาหารที่ตรงใจคุณ:")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("✅ เลือกร้านนี้"):
-            st.session_state.step = "thank_you"
-    with col2:
-        if st.button("❌ ไม่มีร้านไหนตรงใจ"):
-            st.session_state.step = "thank_you"
+        selected = st.radio(
+            "เลือกร้านที่ต้องการ",
+            filtered_df["name"].tolist() + ["ไม่มีร้านไหนตรงใจ"]
+        )
 
-# ขั้นตอน 3: ไม่พบผลลัพธ์
-elif st.session_state.step == "no_result":
-    st.warning("😥 ไม่พบร้านอาหารที่ตรงกับความต้องการของคุณ")
-    if st.button("🔁 ลองใหม่"):
-        st.session_state.step = "selecting"
+        if st.button("👉 ยืนยันร้านที่เลือก"):
+            st.session_state.selected_result = selected
 
-# ขั้นตอน 4: หน้าขอบคุณ
-elif st.session_state.step == "thank_you":
-    st.success("🙏 ขอบคุณที่เข้าร่วมการทำแบบทดสอบ")
+    else:
+        st.warning("😥 ไม่พบร้านอาหารที่ตรงกับความต้องการของคุณ")
+        if st.button("ไม่มีร้านไหนตรงใจ"):
+            st.session_state.selected_result = "ไม่มีร้านไหนตรงใจ"
+
+# --- แสดงหน้าขอบคุณ ---
+if st.session_state.selected_result is not None:
+    st.success("🎉 ขอบคุณที่เข้าร่วมการทำแบบทดสอบ!")
+    if st.session_state.selected_result != "ไม่มีร้านไหนตรงใจ":
+        st.markdown(f"คุณเลือกร้าน: **{st.session_state.selected_result}**")
+    else:
+        st.markdown("คุณเลือกว่าไม่มีร้านไหนตรงใจ")
+
     if st.button("🔁 ทำอีกครั้ง"):
-        st.session_state.step = "selecting"
+        st.session_state.submitted = False
+        st.session_state.selected_result = None
+        st.experimental_rerun()
