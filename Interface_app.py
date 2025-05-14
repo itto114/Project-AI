@@ -1,15 +1,17 @@
 import streamlit as st
 import pandas as pd
 
-# --- โหลดข้อมูลจาก Google Sheet ---
-sheet_url = "https://docs.google.com/spreadsheets/d/1ENpJYa3tnNrv6BBZJFG9pDNUTDqkbP7RQyBnA6pKSLI/edit?gid=0#gid=0"
-csv_url = sheet_url.replace("/edit?gid=0#gid=0", "/export?format=csv")
+# --- สร้างข้อมูลร้านอาหารด้วยตัวเอง ---
+data = {
+    'name': ['ร้าน A', 'ร้าน B', 'ร้าน C', 'ร้าน D'],
+    'type_1': ['อาหารไทย', 'อาหารจีน', 'อาหารญี่ปุ่น', 'อาหารเกาหลี'],
+    'type_2': ['ข้าว', 'ก๋วยเตี๋ยว', 'ซูชิ', 'บิบิมบับ'],
+    'location': ['ใกล้มหาวิทยาลัย', 'ในเมือง', 'ย่านห้างสรรพสินค้า', 'แถวริมทะเล'],
+    'budget': ['ต่ำกว่า 100', '100-200', '200-300', '300-400'],
+    'time_to_open': ['10:00 AM', '11:00 AM', '12:00 PM', '10:30 AM']
+}
 
-@st.cache_data
-def load_data(url):
-    return pd.read_csv(url)
-
-df = load_data(csv_url)
+df = pd.DataFrame(data)
 
 # --- เริ่มต้นค่า session_state ถ้ายังไม่ถูกตั้งค่า ---
 if 'step' not in st.session_state:
