@@ -31,7 +31,7 @@ def send_log_to_sheet(action, user_location, user_type, user_budget, user_time, 
         #st.error(f"เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: {e}")
 
 # --- เรียกใช้ฟังก์ชันนี้ในส่วนที่ต้องการ ---
-send_log_to_sheet("Action", "Location", "Food Type", "Budget", "Time", "Result")
+#send_log_to_sheet("Action", "Location", "Food Type", "Budget", "Time", "Result")
 
 
 # --- ตัวเลือกฐานข้อมูลหลักสำหรับการกรอก ---
