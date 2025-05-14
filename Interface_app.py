@@ -21,8 +21,8 @@ df = pd.DataFrame(restaurant_data)
 # ---------- 3. ตั้งค่า Session State ----------
 if "step" not in st.session_state:
     st.session_state.step = 1
-if "selected_restaurants" not in st.session_state:
-    st.session_state.selected_restaurants = []
+if "selected_restaurant" not in st.session_state:
+    st.session_state.selected_restaurant = None
 
 # ---------- ส่วนที่ 1: เลือกปัจจัย ----------
 if st.session_state.step == 1:
@@ -48,33 +48,31 @@ elif st.session_state.step == 2:
     st.subheader("🍴 ร้านที่ตรงกับความต้องการของคุณ")
 
     filtered_df = st.session_state.filtered_df
-    selected = []
+    selected_radio = None
 
     if not filtered_df.empty:
-        for index, row in filtered_df.iterrows():
-            checkbox_label = f"✅ {row['name']}"
-            checked = st.checkbox(checkbox_label, key=row["name"])
-            if checked:
-                selected.append(row["name"])
+        options = [row["name"] for index, row in filtered_df.iterrows()]
+        selected_radio = st.radio("เลือกร้านที่คุณต้องการ:", options)
 
-            # ข้อมูลร้านใต้ชื่อร้าน
-            st.markdown(f"""
-                └ 📍 **บริเวณ:** {row['location']}  
-                └ 💸 **งบประมาณ:** {row['budget']}  
-                └ 🍱 **ประเภทอาหาร:** {row['type_1']}  
-                └ ⏰ **เวลาเปิด:** {row['time_to_open']}  
-            """)
-            st.markdown("---")
+        for index, row in filtered_df.iterrows():
+            if row["name"] == selected_radio:
+                st.markdown(f"""
+                    └ 📍 **บริเวณ:** {row['location']}  
+                    └ 💸 **งบประมาณ:** {row['budget']}  
+                    └ 🍱 **ประเภทอาหาร:** {row['type_1']}  
+                    └ ⏰ **เวลาเปิด:** {row['time_to_open']}  
+                """)
+                st.markdown("---")
 
         # ปุ่มด้านล่าง
         col1, col2 = st.columns(2)
         with col1:
             if st.button("✅ ยืนยันร้านที่เลือก"):
-                st.session_state.selected_restaurants = selected
+                st.session_state.selected_restaurant = selected_radio
                 st.session_state.step = 3
         with col2:
             if st.button("❌ ไม่มีร้านไหนถูกใจ"):
-                st.session_state.selected_restaurants = []
+                st.session_state.selected_restaurant = None
                 st.session_state.step = 3
     else:
         st.warning("ไม่พบร้านที่ตรงกับเงื่อนไข 😥")
@@ -85,14 +83,13 @@ elif st.session_state.step == 2:
 elif st.session_state.step == 3:
     st.header("🙏 ขอบคุณที่ใช้ระบบแนะนำร้านอาหาร")
 
-    if st.session_state.selected_restaurants:
+    if st.session_state.selected_restaurant:
         st.write("🎉 คุณเลือกร้าน:")
-        for r in st.session_state.selected_restaurants:
-            st.markdown(f"- 🏆 **{r}**")
+        st.markdown(f"- 🏆 **{st.session_state.selected_restaurant}**")
     else:
         st.write("😕 ไม่มีร้านไหนถูกใจคุณ")
 
     if st.button("🔄 เริ่มใหม่"):
         st.session_state.step = 1
-        st.session_state.selected_restaurants = []
+        st.session_state.selected_restaurant = None
         st.session_state.pop("filtered_df", None)
