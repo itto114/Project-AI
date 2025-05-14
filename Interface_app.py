@@ -15,7 +15,7 @@ df = load_data(csv_url)
 st.header("🍽️ ระบบแนะนำร้านอาหาร (เฉพาะร้านที่ตรงเงื่อนไข)")
 
 # สร้างตัวเลือกประเภทอาหารจาก type1 และ type2
-all_types = pd.unique(pd.concat([df["type1"], df["type2"]]).dropna())
+all_types = pd.unique(pd.concat([df["type_1"], df["type_2"]]).dropna())
 
 user_location = st.selectbox("📍 เลือกบริเวณ", df["location"].dropna().unique())
 user_type = st.selectbox("🍱 เลือกประเภทอาหาร", all_types)
@@ -28,8 +28,8 @@ filtered_df = df[
     (df["budget"] == user_budget) &
     (df["time_to_open"] == user_time) &
     (
-        (df["type1"] == user_type) |
-        (df["type2"] == user_type)
+        (df["type_1"] == user_type) |
+        (df["type_2"] == user_type)
     )
 ]
 
@@ -37,7 +37,7 @@ filtered_df = df[
 if not filtered_df.empty:
     st.subheader("✅ ร้านอาหารที่ตรงกับความต้องการ:")
     for _, row in filtered_df.iterrows():
-        st.markdown(f"- **{row['name']}** ({row['type1']} / {row['type2']})")
+        st.markdown(f"- **{row['name']}** ({row['type_1']} / {row['type_2']})")
 else:
     st.warning("😥 ไม่พบร้านอาหารที่ตรงกับความต้องการของคุณ")
 
