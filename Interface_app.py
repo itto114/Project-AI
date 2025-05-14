@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 
 # --- โหลดข้อมูลจาก Google Sheet ---
-sheet_url = "https://docs.google.com/spreadsheets/d/1ENpJYa3tnNrv6BBZJFG9pDNUTDqkbP7RQyBnA6pKSLI/edit?usp=sharing"
-csv_url = sheet_url.replace("/edit?usp=sharing", "/export?format=csv")
+sheet_url = "https://docs.google.com/spreadsheets/d/1ENpJYa3tnNrv6BBZJFG9pDNUTDqkbP7RQyBnA6pKSLI/edit?gid=0#gid=0"
+csv_url = sheet_url.replace("/edit?gid=0#gid=0", "/export?format=csv")
 
 @st.cache_data
 def load_data(url):
