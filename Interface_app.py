@@ -99,7 +99,7 @@ elif st.session_state.step == 3:
     if 'selected_restaurants' in st.session_state and st.session_state.selected_restaurants:
         st.write("คุณเลือก: 🏆")
         for restaurant in st.session_state.selected_restaurants:
-            st.markdown({row = df[df['name'] == restaurant].iloc[0]})
+            row = df[df['name'] == restaurant].iloc[0]
             st.write(f"**{restaurant}**")
             st.write(f"📌 ประเภท: {row['type_1']}")
             st.write(f"📍 บริเวณ: {row['location']}")
