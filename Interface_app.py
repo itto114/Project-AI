@@ -24,6 +24,8 @@ try:
 
     st.write(f"คุณเลือก: {user_location}, {user_choice}, {user_budget}, {user_time}")
 
+st.write(df.columns.tolist())
+
 except Exception as e:
     st.error("เกิดข้อผิดพลาดในการโหลดข้อมูลจาก Google Sheet")
     st.exception(e)
@@ -65,5 +67,3 @@ for i, index in enumerate(k_neighbors[1][0]):
 
 if st.button("ไม่มีร้านไหนตรงใจ"):
     st.write("ขออภัย, ไม่มีร้านที่ตรงกับความต้องการของคุณ")
-
-st.write(df.columns.tolist())
