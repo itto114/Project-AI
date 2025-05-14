@@ -65,3 +65,5 @@ for i, index in enumerate(k_neighbors[1][0]):
 
 if st.button("ไม่มีร้านไหนตรงใจ"):
     st.write("ขออภัย, ไม่มีร้านที่ตรงกับความต้องการของคุณ")
+
+st.write(df.columns.tolist())
