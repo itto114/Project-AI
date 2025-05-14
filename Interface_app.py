@@ -12,25 +12,26 @@ def load_data(url):
 df = load_data(csv_url)
 
 # --- กำหนดค่า default ใน session_state ---
-if "submitted" not in st.session_state:
-    st.session_state.submitted = False
-if "selected_result" not in st.session_state:
-    st.session_state.selected_result = None
-if "user_input" not in st.session_state:
-    st.session_state.user_input = {}
+for key, default in {
+    "submitted": False,
+    "selected_result": None,
+    "user_input": {},
+    "trigger_rerun": False,
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
 
-# --- ส่วนของการรีเซ็ต ---
+# --- รีเซ็ตทุกอย่าง ---
 def reset_all():
     st.session_state.submitted = False
     st.session_state.selected_result = None
     st.session_state.user_input = {}
+    st.session_state.trigger_rerun = True
 
-# --- UI หลัก ---
-st.title("🍽️ ระบบแนะนำร้านอาหาร")
-
-# --- แบบฟอร์มให้ผู้ใช้กรอกตัวเลือก ---
+# --- ฟอร์มเลือก ---
 if not st.session_state.submitted:
     with st.form("input_form"):
+        st.title("🍽️ ระบบแนะนำร้านอาหาร")
         st.markdown("### 🔍 กรุณาเลือกความต้องการของคุณ")
 
         user_location = st.selectbox("📍 บริเวณที่ต้องการ", df["location"].dropna().unique())
@@ -39,23 +40,20 @@ if not st.session_state.submitted:
         user_budget = st.selectbox("💸 งบประมาณ", df["budget"].dropna().unique())
         user_time = st.selectbox("⏰ เวลาที่ต้องการไป (ร้านเปิด)", df["time_to_open"].dropna().unique())
 
-        submitted = st.form_submit_button("✅ ยืนยัน")
+        if st.form_submit_button("✅ ยืนยัน"):
+            st.session_state.user_input = {
+                "location": user_location,
+                "type": user_type,
+                "budget": user_budget,
+                "time_to_open": user_time,
+            }
+            st.session_state.submitted = True
+            st.session_state.trigger_rerun = True
 
-    if submitted:
-        st.session_state.user_input = {
-            "location": user_location,
-            "type": user_type,
-            "budget": user_budget,
-            "time_to_open": user_time,
-        }
-        st.session_state.submitted = True
-        st.experimental_rerun()
-
-# --- หลังจากกด "ยืนยัน" แล้ว ---
+# --- แสดงผลลัพธ์เมื่อส่งข้อมูลแล้ว ---
 if st.session_state.submitted and not st.session_state.selected_result:
     user_input = st.session_state.user_input
 
-    # กรองข้อมูล
     filtered_df = df[
         ((df["type_1"] == user_input["type"]) | (df["type_2"] == user_input["type"])) &
         (df["location"] == user_input["location"]) &
@@ -69,14 +67,18 @@ if st.session_state.submitted and not st.session_state.selected_result:
         for i, row in filtered_df.iterrows():
             if st.button(f"เลือก: {row['name']} ({row['type_1']} / {row['type_2']})", key=f"select_{i}"):
                 st.session_state.selected_result = row['name']
-                st.experimental_rerun()
+                st.session_state.trigger_rerun = True
 
-        st.button("❌ ไม่มีร้านไหนตรงใจ", on_click=lambda: st.session_state.update(selected_result="none"))
+        if st.button("❌ ไม่มีร้านไหนตรงใจ"):
+            st.session_state.selected_result = "none"
+            st.session_state.trigger_rerun = True
     else:
         st.warning("😥 ไม่พบร้านอาหารที่ตรงกับความต้องการของคุณ")
-        st.button("❌ ไม่มีร้านไหนตรงใจ", on_click=lambda: st.session_state.update(selected_result="none"))
+        if st.button("❌ ไม่มีร้านไหนตรงใจ"):
+            st.session_state.selected_result = "none"
+            st.session_state.trigger_rerun = True
 
-# --- แสดงหน้าขอบคุณ ---
+# --- หน้าขอบคุณเมื่อเลือกผลลัพธ์เสร็จ ---
 if st.session_state.selected_result:
     st.success("🙏 ขอบคุณที่เข้าร่วมการทำแบบทดสอบ")
     if st.session_state.selected_result != "none":
@@ -86,4 +88,8 @@ if st.session_state.selected_result:
 
     if st.button("🔁 ทำอีกครั้ง"):
         reset_all()
-        st.experimental_rerun()
+
+# --- เช็คว่า trigger rerun อยู่ข้างล่างสุดเท่านั้น ---
+if st.session_state.trigger_rerun:
+    st.session_state.trigger_rerun = False
+    st.experimental_rerun()
