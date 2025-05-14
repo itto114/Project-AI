@@ -24,7 +24,7 @@ all_types = pd.unique(pd.concat([df["type_1"], df["type_2"]]).dropna())
 user_location = st.selectbox("📍 บริเวณที่ต้องการ", df["location"].dropna().unique())
 user_type = st.selectbox("🍱 ประเภทอาหาร", all_types)
 user_budget = st.selectbox("💸 งบประมาณ", df["budget"].dropna().unique())
-user_time = st.selectbox("⏰ เวลา", df["time_to_open"].dropna().unique())
+user_time = st.selectbox("⏰ เวลาที่ต้องการจะไป (ร้านเปิด)", df["time_to_open"].dropna().unique())
 
 # === กรองจากประเภทอาหารที่ตรงกับ type1 หรือ type2 ===
 filtered_df = df[
@@ -43,7 +43,7 @@ filtered_df = filtered_df[
 if not filtered_df.empty:
     st.subheader("ร้านอาหารที่ตรงกับเงื่อนไขของคุณ:")
     for index, row in filtered_df.iterrows():
-        st.markdown(f"- **{row['ชื่อร้าน']}** ({row['type_1']} / {row['type_2']})")
+        st.markdown(f"- **{row['name']}** ({row['type_1']} / {row['type_2']})")
 else:
     st.warning("ไม่พบร้านอาหารที่ตรงกับความต้องการของคุณ")
     
