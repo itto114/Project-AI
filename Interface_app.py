@@ -55,6 +55,21 @@ elif st.session_state.step == 2:
         restaurant_names = filtered_df["name"].tolist()
         selected_restaurant = st.radio("เลือกดูร้านอาหารที่คุณชอบ", restaurant_names)
 
+        # แสดงปัจจัยที่เลือก
+        st.markdown("### 📝 **ปัจจัยที่คุณเลือก**:")
+        st.write(f"📍 **บริเวณที่เลือก**: {user_location}")
+        st.write(f"🍱 **ประเภทอาหาร**: {user_type}")
+        st.write(f"💸 **งบประมาณ**: {user_budget}")
+        st.write(f"⏰ **เวลาเปิดร้าน**: {user_time}")
+
+        # แสดงข้อมูลร้านที่เลือก
+        selected_row = filtered_df[filtered_df["name"] == selected_restaurant].iloc[0]
+        st.markdown(f"### 🏆 **ร้านที่คุณเลือก: {selected_row['name']}**")
+        st.write(f"**ประเภทอาหาร**: {selected_row['type_1']} / {selected_row['type_2']}")
+        st.write(f"**บริเวณ**: {selected_row['location']}")
+        st.write(f"**งบประมาณ**: {selected_row['budget']}")
+        st.write(f"**เวลาเปิดร้าน**: {selected_row['time_to_open']}")
+
         # สร้างคอลัมน์สำหรับจัดตำแหน่งปุ่ม
         col1, col2 = st.columns([1, 1])
 
