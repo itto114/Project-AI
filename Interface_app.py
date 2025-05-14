@@ -87,13 +87,13 @@ elif st.session_state.step == 2:
                 if selected_restaurants:
                     st.session_state.selected_restaurant = selected_restaurants
                     st.session_state.history.extend(selected_restaurants)
-                    for sel in selected_restaurants:
-                        send_log_to_sheet("Selected", user_location, user_type, user_budget, user_time, sel)
+                    #for sel in selected_restaurants:
+                       # send_log_to_sheet("Selected", user_location, user_type, user_budget, user_time, sel)
                     st.session_state.step = 3
         with col2:
             if st.button("❌ ไม่มีร้านไหนถูกใจ"):
                 st.session_state.selected_restaurant = []
-                send_log_to_sheet("No Match", user_location, user_type, user_budget, user_time, "None")
+               # send_log_to_sheet("No Match", user_location, user_type, user_budget, user_time, "None")
                 st.session_state.step = 3
     else:
         st.warning("🚫 ไม่พบร้านอาหารที่ตรงกับความต้องการของคุณ")
